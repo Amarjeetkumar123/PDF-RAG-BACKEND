@@ -3,8 +3,42 @@ services:
     image: valkey/valkey
     ports:
       - 6388:6379
+    volumes:
+      - valkey_data:/data
   
   qdrant:
     image: qdrant/qdrant
     ports:
       - 6333:6333
+    volumes:
+      - qdrant_data:/qdrant/storage
+  
+  app:
+    build: .
+    ports:
+      - 8000:8000
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      - LOG_LEVEL=info
+      - BULLMQ_HOST=valkey
+      - BULLMQ_PORT=6379
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_COLLECTION=pdf-docs
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_API_INSTANCE_NAME=${AZURE_OPENAI_API_INSTANCE_NAME}
+      - AZURE_OPENAI_API_DEPLOYMENT_NAME=${AZURE_OPENAI_API_DEPLOYMENT_NAME}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION}
+      - AZURE_OPENAI_EMBEDDINGS_API_KEY=${AZURE_OPENAI_EMBEDDINGS_API_KEY}
+      - AZURE_OPENAI_EMBEDDINGS_INSTANCE_NAME=${AZURE_OPENAI_EMBEDDINGS_INSTANCE_NAME}
+      - AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME=${AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME}
+      - AZURE_OPENAI_EMBEDDINGS_API_VERSION=${AZURE_OPENAI_EMBEDDINGS_API_VERSION}
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - valkey
+      - qdrant
+
+volumes:
+  valkey_data:
+  qdrant_data:
