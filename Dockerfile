@@ -1,5 +1,5 @@
-# Use Node.js 18 Alpine for smaller image size
-FROM node:18-alpine
+# Use latest Node.js Alpine for smaller image size
+FROM node:alpine
 
 # Enable corepack and pin pnpm to the package.json version
 RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
