@@ -48,6 +48,30 @@ class VectorService {
             throw error;
         }
     }
+
+    async deleteDocumentsBySource(source) {
+        try {
+            const vectorStore = await this.getVectorStore();
+            
+            // Create a filter to match documents with the specified source
+            const filter = {
+                must: [
+                    {
+                        key: "source",
+                        match: { value: source }
+                    }
+                ]
+            };
+
+            // Delete documents matching the filter
+            await vectorStore.delete({ filter });
+            
+            logger.info('Documents deleted by source', { source });
+        } catch (error) {
+            logger.error('Failed to delete documents by source', { error: error.message, source });
+            throw error;
+        }
+    }
 }
 
 module.exports = new VectorService();

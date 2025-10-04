@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const queueService = require('../services/queueService');
+const vectorService = require('../services/vectorService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -39,9 +40,10 @@ router.post('/pdf', upload.single('pdf'), async (req, res) => {
             originalName: req.file.originalname 
         });
 
-        res.json({ 
+        res.status(200).json({ 
             message: 'File uploaded successfully',
-            filename: req.file.filename 
+            filename: req.file.filename,
+            filePath: req.file.path
         });
     } catch (error) {
         logger.error('PDF upload failed', { 
@@ -49,6 +51,36 @@ router.post('/pdf', upload.single('pdf'), async (req, res) => {
         });
         res.status(500).json({ 
             error: 'Failed to upload file' 
+        });
+    }
+});
+
+// DELETE route to remove documents by source
+router.delete('/pdf/:source', async (req, res) => {
+    try {
+        const { source } = req.params;
+        
+        if (!source) {
+            return res.status(400).json({ 
+                error: 'Source parameter is required' 
+            });
+        }
+
+        await vectorService.deleteDocumentsBySource(source);
+
+        logger.info('Documents deleted by source', { source });
+
+        res.json({ 
+            message: 'Documents deleted successfully',
+            source: source 
+        });
+    } catch (error) {
+        logger.error('Failed to delete documents by source', { 
+            error: error.message,
+            source: req.params.source 
+        });
+        res.status(500).json({ 
+            error: 'Failed to delete documents' 
         });
     }
 });
