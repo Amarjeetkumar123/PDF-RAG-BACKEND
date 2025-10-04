@@ -2,29 +2,29 @@ services:
   valkey:
     image: valkey/valkey
     ports:
-      - 6388:6379
+      - ${BULLMQ_PORT}:6379
     volumes:
       - valkey_data:/data
   
   qdrant:
     image: qdrant/qdrant
     ports:
-      - 6333:6333
+      - ${QDRANT_PORT}:6333
     volumes:
       - qdrant_data:/qdrant/storage
   
   app:
     build: .
     ports:
-      - 8000:8000
+      - ${PORT}:8000
     environment:
       - NODE_ENV=production
-      - PORT=8000
-      - LOG_LEVEL=info
-      - BULLMQ_HOST=valkey
-      - BULLMQ_PORT=6379
-      - QDRANT_URL=http://qdrant:6333
-      - QDRANT_COLLECTION=pdf-docs
+      - PORT=${PORT}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - BULLMQ_HOST=${BULLMQ_HOST}
+      - BULLMQ_PORT=${BULLMQ_PORT}
+      - QDRANT_URL=${QDRANT_URL}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION}
       - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
       - AZURE_OPENAI_API_INSTANCE_NAME=${AZURE_OPENAI_API_INSTANCE_NAME}
       - AZURE_OPENAI_API_DEPLOYMENT_NAME=${AZURE_OPENAI_API_DEPLOYMENT_NAME}

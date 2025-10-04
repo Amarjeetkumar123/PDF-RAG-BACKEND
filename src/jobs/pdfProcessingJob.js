@@ -1,5 +1,7 @@
 const { Worker } = require('bullmq');
 const { PDFLoader } = require("@langchain/community/document_loaders/fs/pdf");
+const fs = require('fs').promises;
+const path = require('path');
 const vectorService = require('../services/vectorService');
 const logger = require('../utils/logger');
 
@@ -41,6 +43,24 @@ class PDFProcessingJob {
 
             // Add documents to vector store
             await vectorService.addDocuments(docs);
+            
+            // Remove the processed file
+            try {
+                await fs.unlink(data.path);
+                logger.info('PDF file removed successfully', { 
+                    jobId: job.id, 
+                    filename: data.filename,
+                    path: data.path 
+                });
+            } catch (removeError) {
+                logger.warn('Failed to remove PDF file after processing', { 
+                    jobId: job.id, 
+                    filename: data.filename,
+                    path: data.path,
+                    error: removeError.message 
+                });
+                // Don't throw error here as processing was successful
+            }
             
             logger.info('PDF processing completed successfully', { 
                 jobId: job.id, 
